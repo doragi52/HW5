@@ -4,6 +4,7 @@
 #include "user.h"
 #include "mmu.h"
 #include "x86.h"
+#define PGSIZE  4096
 
 char*
 strcpy(char *s, const char *t)
@@ -137,5 +138,3 @@ int thread_join()
   //free(stackPtr);
   return x;
 }
-
-
