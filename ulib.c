@@ -105,3 +105,37 @@ memmove(void *vdst, const void *vsrc, int n)
     *dst++ = *src++;
   return vdst;
 }
+
+void lock_init(lock_t *lock) {
+  lock->flag = 0;
+}
+
+void lock_acquire(lock_t *lock) {
+  while(xchg(&lock->flag, 1) != 0);
+}
+
+void lock_release(lock_t *lock) {
+  xchg(&lock->flag, 0);
+}
+
+
+int thread_create(void (*start_routine)(void *, void *), void * arg1, void * arg2)
+{
+
+  void * stack;
+  stack = malloc(PGSIZE);
+ /* if((int)stack%PGSIZE !=0){//check if the stack is page aligned
+    return -1;
+  }*/
+  return clone(start_routine, arg1, arg2, stack);
+}
+
+int thread_join()
+{
+  void * stackPtr;
+  int x = join(&stackPtr);
+  //free(stackPtr);
+  return x;
+}
+
+
