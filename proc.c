@@ -548,26 +548,25 @@ int clone(void(*fcn)(void*,void*), void *arg1, void *arg2, void* stack)
 
   void *thrArg1, *thrArg2, *fakeaddr;
   //Push fake return addr and args to the child thread’s stack
-  fakeaddr = stack + PGSIZE -3*sizeof(void *);
+  fakeaddr = stack + PGSIZE - sizeof(void*);
   *(uint*)fakeaddr = 0xFFFFFFF;
 
   //pushing the first argument to the stack of thread
-  thrArg1 = stack + PGSIZE -2*sizeof(void *);
+  thrArg1 = stack + PGSIZE - 2 *sizeof(void *);
   *(uint*)thrArg1 = (uint)arg1;
 
   //pushing the second argument to the stack of thread
-  thrArg2 = stack + PGSIZE - sizeof(void *);
+  thrArg2 = stack + PGSIZE - 3 *sizeof(void *);
   *(uint*)thrArg2 = (uint)arg2;
 
-  //Set proper registers for child thread
-  np->tf->esp = (uint) stack; 
-  np->tf->eax = 0;
   np->threadstack = stack;   //saving the address of the stack
 
-  np->tf->ebp = np->tf->esp;
-  np->tf->esp += PGSIZE -3*sizeof(void*) ;
+  np->tf->ebp = (uint) stack + PGSIZE; 
+  np->tf->esp = (uint) stack + PGSIZE -3*sizeof(void*) ;
   np->tf->eip = (uint) fcn; //begin excuting code from this function
-
+  
+  //Set proper registers for child thread
+  np->tf->eax = 0;
 
   np->state = RUNNABLE;
   np->cwd = idup(mp->cwd);

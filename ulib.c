@@ -107,6 +107,20 @@ memmove(void *vdst, const void *vsrc, int n)
   return vdst;
 }
 
+
+void lock_init(lock_t *lock) {
+  lock->flag = 0;
+}
+
+void lock_acquire(lock_t *lock) {
+  while(xchg(&lock->flag, 1) != 0);
+}
+
+void lock_release(lock_t *lock) {
+  xchg(&lock->flag, 0);
+}
+
+
 int thread_create(void (*fcn)(void*, void*), void* arg1, void* arg2)
 {
   void *stackptr ;
@@ -123,18 +137,5 @@ int thread_join()
   if ((pid = join(&stackptr)) == -1)
     return -1;
 
-  free(stackptr);
   return pid;
 }
-void lock_init(lock_t *lock) {
-  lock->flag = 0;
-}
-
-void lock_acquire(lock_t *lock) {
-  while(xchg(&lock->flag, 1) != 0);
-}
-
-void lock_release(lock_t *lock) {
-  xchg(&lock->flag, 0);
-}
-
